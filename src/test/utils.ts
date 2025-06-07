@@ -1,6 +1,7 @@
 import { mount, VueWrapper } from '@vue/test-utils';
-import { Component } from 'vue';
+import type { Component } from 'vue';
 import { createI18n } from 'vue-i18n';
+import { vi, expect } from 'vitest';
 import type { WifiCredentials, EncryptionType } from '@/types';
 
 // Test data fixtures
@@ -61,7 +62,7 @@ export function createWrapper<T extends Component>(
     locale?: 'en' | 'vi';
     global?: Record<string, any>;
   } = {}
-): VueWrapper {
+): VueWrapper<any> {
   const { props = {}, locale = 'en', global = {} } = options;
 
   const i18n = createI18n({
@@ -94,30 +95,30 @@ export function createWrapper<T extends Component>(
     },
   });
 
-  return mount(component, {
-    props,
+  return mount(component as any, {
+    props: props as any,
     global: {
       plugins: [i18n],
       ...global,
     },
-  });
+  }) as VueWrapper<any>;
 }
 
 // Helper to simulate user input
-export async function fillInput(wrapper: VueWrapper, selector: string, value: string): Promise<void> {
+export async function fillInput(wrapper: VueWrapper<any>, selector: string, value: string): Promise<void> {
   const input = wrapper.find(selector);
   await input.setValue(value);
   await input.trigger('input');
 }
 
 // Helper to simulate button clicks
-export async function clickButton(wrapper: VueWrapper, selector: string): Promise<void> {
+export async function clickButton(wrapper: VueWrapper<any>, selector: string): Promise<void> {
   const button = wrapper.find(selector);
   await button.trigger('click');
 }
 
 // Helper to simulate keyboard events
-export async function pressKey(wrapper: VueWrapper, key: string, modifiers: string[] = []): Promise<void> {
+export async function pressKey(wrapper: VueWrapper<any>, key: string, modifiers: string[] = []): Promise<void> {
   const keyboardEvent = new KeyboardEvent('keydown', {
     key,
     ctrlKey: modifiers.includes('ctrl'),
@@ -125,7 +126,7 @@ export async function pressKey(wrapper: VueWrapper, key: string, modifiers: stri
     shiftKey: modifiers.includes('shift'),
     altKey: modifiers.includes('alt'),
   });
-  
+
   document.dispatchEvent(keyboardEvent);
   await wrapper.vm.$nextTick();
 }
@@ -151,19 +152,19 @@ export function mockCanvasContext(): void {
     translate: vi.fn(),
     rotate: vi.fn(),
     clearRect: vi.fn(),
-  };
+  } as any;
 
-  HTMLCanvasElement.prototype.getContext = vi.fn(() => mockContext);
-  HTMLCanvasElement.prototype.toDataURL = vi.fn(() => 'data:image/png;base64,mock-data');
+  (HTMLCanvasElement.prototype.getContext as any) = vi.fn(() => mockContext);
+  (HTMLCanvasElement.prototype.toDataURL as any) = vi.fn(() => 'data:image/png;base64,mock-data');
 }
 
 // Helper to assert QR code generation
-export function expectQRCodeGenerated(wrapper: VueWrapper): void {
+export function expectQRCodeGenerated(wrapper: VueWrapper<any>): void {
   const canvas = wrapper.find('canvas');
   expect(canvas.exists()).toBe(true);
 }
 
 // Helper to assert translation keys
-export function expectTranslation(wrapper: VueWrapper, text: string): void {
+export function expectTranslation(wrapper: VueWrapper<any>, text: string): void {
   expect(wrapper.text()).toContain(text);
 }

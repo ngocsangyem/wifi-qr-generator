@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, beforeEach } from 'vitest';
 import { config } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 

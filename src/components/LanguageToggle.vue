@@ -30,9 +30,10 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useI18nUtils } from '@/composables/useI18nUtils';
 import type { Locale } from '@/locales';
+import type { AcceptableValue } from 'reka-ui';
 
 type Emits = {
-  'language-changed': [locale: string];
+  'language-changed': [locale: Locale];
 };
 
 const emit = defineEmits<Emits>();
@@ -47,9 +48,21 @@ const getLanguageCode = (locale: Locale): string => {
   return codes[locale];
 };
 
-const handleLanguageChange = (newLocale: string): void => {
-  const locale = newLocale as Locale;
-  changeLocale(locale);
-  emit('language-changed', locale);
+const handleLanguageChange = (newLocale: AcceptableValue): void => {
+  // Only accept string values for locale
+  if (!newLocale || typeof newLocale !== 'string') return;
+
+  // Type guard to ensure the locale is valid
+  const isValidLocale = (value: string): value is Locale => {
+    return ['en', 'vi'].includes(value);
+  };
+
+  if (!isValidLocale(newLocale)) {
+    console.warn(`Invalid locale: ${newLocale}`);
+    return;
+  }
+
+  changeLocale(newLocale);
+  emit('language-changed', newLocale);
 };
 </script>

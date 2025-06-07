@@ -40,7 +40,7 @@ export const i18n = createI18n<[MessageSchema], Locale>({
 
 // Helper function to change locale and persist
 export const setLocale = (locale: Locale): void => {
-  i18n.global.locale.value = locale;
+  i18n.global.locale = locale;
   localStorage.setItem(STORAGE_KEY, locale);
   document.documentElement.lang = locale;
 };

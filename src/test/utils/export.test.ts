@@ -1,13 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { captureElementAsImage, generateQRCodeFilename } from '@/utils/export';
 
+// Extend global interface for html2canvas
+declare global {
+  var html2canvas: any;
+}
+
 describe('export utilities', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Mock DOM elements
-    document.getElementById = vi.fn();
-    document.createElement = vi.fn();
+    // Mock DOM elements with proper type assertions
+    document.getElementById = vi.fn() as any;
+    document.createElement = vi.fn() as any;
 
     // Mock canvas and context
     const mockCanvas = {
@@ -19,18 +24,18 @@ describe('export utilities', () => {
         fillRect: vi.fn(),
         drawImage: vi.fn(),
       })),
-    };
+    } as any;
 
     const mockLink = {
       download: '',
       href: '',
       click: vi.fn(),
-    };
+    } as any;
 
-    document.createElement = vi.fn((tagName) => {
+    (document.createElement as any) = vi.fn((tagName: string) => {
       if (tagName === 'canvas') return mockCanvas;
       if (tagName === 'a') return mockLink;
-      return {};
+      return {} as any;
     });
 
     // Mock html2canvas globally
@@ -81,8 +86,8 @@ describe('export utilities', () => {
 
   describe('captureElementAsImage', () => {
     it('throws error when element not found', async () => {
-      document.getElementById = vi.fn(() => null);
-      
+      (document.getElementById as any) = vi.fn(() => null);
+
       await expect(captureElementAsImage('non-existent')).rejects.toThrow(
         'Element with id "non-existent" not found'
       );
@@ -93,13 +98,13 @@ describe('export utilities', () => {
         scrollWidth: 400,
         scrollHeight: 300,
         querySelectorAll: vi.fn(() => []),
-      };
+      } as any;
 
       const mockCanvas = {
         width: 200,
         height: 200,
         toDataURL: vi.fn(() => 'data:image/png;base64,original-data'),
-      };
+      } as any;
 
       const mockCenteredCanvas = {
         width: 0,
@@ -110,19 +115,19 @@ describe('export utilities', () => {
           drawImage: vi.fn(),
         })),
         toDataURL: vi.fn(() => 'data:image/png;base64,centered-data'),
-      };
+      } as any;
 
       const mockLink = {
         download: '',
         href: '',
         click: vi.fn(),
-      };
+      } as any;
 
-      document.getElementById = vi.fn(() => mockElement);
-      document.createElement = vi.fn((tagName) => {
+      (document.getElementById as any) = vi.fn(() => mockElement);
+      (document.createElement as any) = vi.fn((tagName: string) => {
         if (tagName === 'a') return mockLink;
         if (tagName === 'canvas') return mockCenteredCanvas;
-        return {};
+        return {} as any;
       });
 
       // Mock html2canvas
@@ -138,30 +143,29 @@ describe('export utilities', () => {
     it('hides elements with specified classes during capture', async () => {
       const mockHiddenElement = {
         style: { display: '' },
-      };
-      
+      } as any;
+
       const mockElement = {
         scrollWidth: 400,
         scrollHeight: 300,
         querySelectorAll: vi.fn(() => [mockHiddenElement]),
-      };
-      
+      } as any;
+
       const mockCanvas = {
         width: 200,
         height: 200,
         toDataURL: vi.fn(() => 'data:image/png;base64,mock-data'),
-      };
-      
-      document.getElementById = vi.fn(() => mockElement);
-      
+      } as any;
+
+      (document.getElementById as any) = vi.fn(() => mockElement);
+
       // Mock html2canvas
-      const mockHtml2Canvas = vi.fn(() => Promise.resolve(mockCanvas));
-      vi.doMock('html2canvas', () => ({ default: mockHtml2Canvas }));
-      
+      global.html2canvas = vi.fn(() => Promise.resolve(mockCanvas));
+
       await captureElementAsImage('test-element', 'test.png', {
         hideClasses: ['print:hidden'],
       });
-      
+
       // Verify element was hidden and restored
       expect(mockElement.querySelectorAll).toHaveBeenCalledWith('.print\\:hidden');
     });
@@ -169,15 +173,15 @@ describe('export utilities', () => {
     it('restores hidden elements even if error occurs', async () => {
       const mockHiddenElement = {
         style: { display: 'block' },
-      };
+      } as any;
 
       const mockElement = {
         scrollWidth: 400,
         scrollHeight: 300,
         querySelectorAll: vi.fn(() => [mockHiddenElement]),
-      };
+      } as any;
 
-      document.getElementById = vi.fn(() => mockElement);
+      (document.getElementById as any) = vi.fn(() => mockElement);
 
       // Mock html2canvas to throw error
       global.html2canvas = vi.fn(() => Promise.reject(new Error('Canvas error')));
@@ -193,13 +197,13 @@ describe('export utilities', () => {
         scrollWidth: 400,
         scrollHeight: 300,
         querySelectorAll: vi.fn(() => []),
-      };
+      } as any;
 
       const mockCanvas = {
         width: 200,
         height: 200,
         toDataURL: vi.fn(() => 'data:image/png;base64,mock-data'),
-      };
+      } as any;
 
       const mockCenteredCanvas = {
         width: 0,
@@ -210,19 +214,19 @@ describe('export utilities', () => {
           drawImage: vi.fn(),
         })),
         toDataURL: vi.fn(() => 'data:image/png;base64,centered-data'),
-      };
+      } as any;
 
       const mockLink = {
         download: '',
         href: '',
         click: vi.fn(),
-      };
+      } as any;
 
-      document.getElementById = vi.fn(() => mockElement);
-      document.createElement = vi.fn((tagName) => {
+      (document.getElementById as any) = vi.fn(() => mockElement);
+      (document.createElement as any) = vi.fn((tagName: string) => {
         if (tagName === 'a') return mockLink;
         if (tagName === 'canvas') return mockCenteredCanvas;
-        return {};
+        return {} as any;
       });
 
       // Mock html2canvas
@@ -241,13 +245,13 @@ describe('export utilities', () => {
         scrollWidth: 400,
         scrollHeight: 300,
         querySelectorAll: vi.fn(() => []),
-      };
+      } as any;
 
       const mockCanvas = {
         width: 200,
         height: 200,
         toDataURL: vi.fn(() => 'data:image/png;base64,mock-data'),
-      };
+      } as any;
 
       const mockCenteredCanvas = {
         width: 0,
@@ -258,19 +262,19 @@ describe('export utilities', () => {
           drawImage: vi.fn(),
         })),
         toDataURL: vi.fn(() => 'data:image/png;base64,centered-data'),
-      };
+      } as any;
 
       const mockLink = {
         download: '',
         href: '',
         click: vi.fn(),
-      };
+      } as any;
 
-      document.getElementById = vi.fn(() => mockElement);
-      document.createElement = vi.fn((tagName) => {
+      (document.getElementById as any) = vi.fn(() => mockElement);
+      (document.createElement as any) = vi.fn((tagName: string) => {
         if (tagName === 'a') return mockLink;
         if (tagName === 'canvas') return mockCenteredCanvas;
-        return {};
+        return {} as any;
       });
 
       // Mock html2canvas
@@ -292,41 +296,40 @@ describe('export utilities', () => {
         scrollWidth: 400,
         scrollHeight: 300,
         querySelectorAll: vi.fn(() => []),
-      };
-      
+      } as any;
+
       const mockOriginalCanvas = {
         width: 200,
         height: 150,
         toDataURL: vi.fn(() => 'data:image/png;base64,original-data'),
-      };
-      
+      } as any;
+
       const mockContext = {
         fillStyle: '',
         fillRect: vi.fn(),
         drawImage: vi.fn(),
-      };
-      
+      } as any;
+
       const mockCenteredCanvas = {
         width: 0,
         height: 0,
         getContext: vi.fn(() => mockContext),
         toDataURL: vi.fn(() => 'data:image/png;base64,centered-data'),
-      };
-      
-      document.getElementById = vi.fn(() => mockElement);
-      document.createElement = vi.fn(() => mockCenteredCanvas);
-      
+      } as any;
+
+      (document.getElementById as any) = vi.fn(() => mockElement);
+      (document.createElement as any) = vi.fn(() => mockCenteredCanvas);
+
       // Mock html2canvas
-      const mockHtml2Canvas = vi.fn(() => Promise.resolve(mockOriginalCanvas));
-      vi.doMock('html2canvas', () => ({ default: mockHtml2Canvas }));
-      
+      global.html2canvas = vi.fn(() => Promise.resolve(mockOriginalCanvas));
+
       await captureElementAsImage('test-element', 'test.png', { scale: 2 });
-      
+
       // Check that centered canvas has proper dimensions (original + padding)
       const expectedPadding = 40 * 2; // 40px * scale
       expect(mockCenteredCanvas.width).toBe(200 + expectedPadding * 2);
       expect(mockCenteredCanvas.height).toBe(150 + expectedPadding * 2);
-      
+
       // Check that content is drawn centered
       const expectedX = (mockCenteredCanvas.width - 200) / 2;
       const expectedY = (mockCenteredCanvas.height - 150) / 2;
