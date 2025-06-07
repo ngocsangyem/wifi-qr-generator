@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import WifiForm from './components/WifiForm.vue'
-import QRCodeDisplay from './components/QRCodeDisplay.vue'
-import ThemeToggle from './components/ThemeToggle.vue'
-import LanguageToggle from './components/LanguageToggle.vue'
+import { ref, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { useTheme } from './composables/useTheme'
 import { useI18nUtils } from './composables/useI18nUtils'
-import { captureElementAsImage, generateQRCodeFilename } from './utils/export'
 import type { WifiCredentials, QRCodeData } from './types'
+
+// Dynamic imports for code splitting
+const WifiForm = defineAsyncComponent(() => import('./components/WifiForm.vue'))
+const QRCodeDisplay = defineAsyncComponent(() => import('./components/QRCodeDisplay.vue'))
+const ThemeToggle = defineAsyncComponent(() => import('./components/ThemeToggle.vue'))
+const LanguageToggle = defineAsyncComponent(() => import('./components/LanguageToggle.vue'))
+
+// Lazy load export utilities
+const loadExportUtils = () => import('./utils/export')
 
 // Initialize theme and i18n
 const { isDark, toggleTheme } = useTheme()
@@ -45,6 +49,7 @@ const qrData = computed<QRCodeData>(() => {
 // Event handlers
 const handleSaveAsImage = async () => {
   try {
+    const { captureElementAsImage, generateQRCodeFilename } = await loadExportUtils()
     const filename = generateQRCodeFilename(credentials.value.ssid)
     await captureElementAsImage('printable-area', filename, {
       hideClasses: ['print:hidden'],
@@ -106,8 +111,18 @@ onUnmounted(() => {
           </p>
         </div>
         <div class="flex items-center gap-3">
-          <LanguageToggle @language-changed="handleLanguageChange" />
-          <ThemeToggle />
+          <Suspense>
+            <LanguageToggle @language-changed="handleLanguageChange" />
+            <template #fallback>
+              <div class="w-24 h-10 bg-muted animate-pulse rounded-md"></div>
+            </template>
+          </Suspense>
+          <Suspense>
+            <ThemeToggle />
+            <template #fallback>
+              <div class="w-9 h-9 bg-muted animate-pulse rounded-md"></div>
+            </template>
+          </Suspense>
         </div>
       </div>
     </header>
@@ -116,18 +131,30 @@ onUnmounted(() => {
     <div class="container mx-auto px-4 py-8">
       <div class="flex flex-col lg:flex-row gap-8 items-start justify-center">
         <!-- Form Section -->
-        <WifiForm
-          :credentials="credentials"
-          @update:credentials="updateCredentials"
-          @save-as-image="handleSaveAsImage"
-          @print="handlePrint"
-        />
+        <Suspense>
+          <WifiForm
+            :credentials="credentials"
+            @update:credentials="updateCredentials"
+            @save-as-image="handleSaveAsImage"
+            @print="handlePrint"
+          />
+          <template #fallback>
+            <div class="w-full max-w-md space-y-4">
+              <div class="h-8 bg-muted animate-pulse rounded-md"></div>
+              <div class="h-10 bg-muted animate-pulse rounded-md"></div>
+              <div class="h-10 bg-muted animate-pulse rounded-md"></div>
+              <div class="h-10 bg-muted animate-pulse rounded-md"></div>
+            </div>
+          </template>
+        </Suspense>
 
         <!-- QR Code Display Section -->
-        <QRCodeDisplay
-          v-if="credentials.ssid"
-          :qr-data="qrData"
-        />
+        <Suspense v-if="credentials.ssid">
+          <QRCodeDisplay :qr-data="qrData" />
+          <template #fallback>
+            <div class="w-64 h-64 bg-muted animate-pulse rounded-md"></div>
+          </template>
+        </Suspense>
       </div>
     </div>
   </div>
