@@ -1,0 +1,262 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run type checking
+      run: npm run type-check
+
+    - name: Run linting
+      run: npm run lint
+
+    - name: Run unit tests with coverage
+      run: npm run test:unit:coverage
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+
+    - name: Upload coverage artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: coverage-report
+        path: coverage/
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps
+
+    - name: Build application
+      run: npm run build
+
+    - name: Run E2E tests
+      run: npm run test:e2e
+
+    - name: Upload Playwright report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results
+        path: test-results/
+        retention-days: 30
+
+  cross-browser-tests:
+    name: Cross-Browser E2E Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps
+
+    - name: Build application
+      run: npm run build
+
+    - name: Run E2E tests on ${{ matrix.browser }}
+      run: npx playwright test --project=${{ matrix.browser }}
+
+    - name: Upload test results for ${{ matrix.browser }}
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ matrix.browser }}
+        path: test-results/
+        retention-days: 30
+
+  mobile-tests:
+    name: Mobile E2E Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps
+
+    - name: Build application
+      run: npm run build
+
+    - name: Run mobile E2E tests
+      run: npx playwright test --project="Mobile Chrome" --project="Mobile Safari"
+
+    - name: Upload mobile test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: mobile-test-results
+        path: test-results/
+        retention-days: 30
+
+  accessibility-tests:
+    name: Accessibility Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps
+
+    - name: Build application
+      run: npm run build
+
+    - name: Run accessibility tests
+      run: npx playwright test --grep "accessibility|a11y"
+
+    - name: Upload accessibility test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: accessibility-test-results
+        path: test-results/
+        retention-days: 30
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [unit-tests, e2e-tests]
+    if: always()
+
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+
+    - name: Create test summary
+      run: |
+        echo "# Test Results Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -d "coverage-report" ]; then
+          echo "## Unit Test Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "Coverage report generated successfully ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ -d "playwright-report" ]; then
+          echo "## E2E Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "Playwright tests completed ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "## Artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "- Coverage Report: Available in artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "- Playwright Report: Available in artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "- Test Results: Available in artifacts" >> $GITHUB_STEP_SUMMARY
+
+    - name: Comment PR with test results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          
+          let comment = '## 🧪 Test Results\n\n';
+          
+          // Check if unit tests passed
+          if (fs.existsSync('coverage-report')) {
+            comment += '✅ Unit tests passed with coverage report\n';
+          } else {
+            comment += '❌ Unit tests failed\n';
+          }
+          
+          // Check if E2E tests passed
+          if (fs.existsSync('playwright-report')) {
+            comment += '✅ E2E tests completed\n';
+          } else {
+            comment += '❌ E2E tests failed\n';
+          }
+          
+          comment += '\n📊 Detailed reports are available in the workflow artifacts.';
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });

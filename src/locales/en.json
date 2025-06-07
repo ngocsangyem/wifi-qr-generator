@@ -1,0 +1,55 @@
+{
+  "app": {
+    "title": "Wi-Fi QR Generator",
+    "description": "Generate QR codes for Wi-Fi networks • Press Ctrl+Shift+T to toggle theme • Press Ctrl+Shift+L to change language"
+  },
+  "form": {
+    "ssid": {
+      "label": "Name",
+      "fullLabel": "Wi-Fi Name (SSID)",
+      "placeholder": "Enter Wi-Fi name"
+    },
+    "encryption": {
+      "label": "Encryption Type",
+      "placeholder": "Select encryption type",
+      "options": {
+        "wpa": "WPA/WPA2",
+        "wep": "WEP",
+        "none": "None"
+      }
+    },
+    "password": {
+      "label": "Password",
+      "placeholder": "Enter password"
+    }
+  },
+  "buttons": {
+    "saveImage": "Save as Image",
+    "print": "Print",
+    "copyPassword": "Copy password"
+  },
+  "qr": {
+    "title": "Connect to Wi-Fi"
+  },
+  "theme": {
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "vietnamese": "Vietnamese"
+  },
+  "accessibility": {
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "messages": {
+    "passwordCopied": "Password copied to clipboard",
+    "errorSavingImage": "Error saving image",
+    "errorGeneratingQR": "Error generating QR code"
+  }
+}

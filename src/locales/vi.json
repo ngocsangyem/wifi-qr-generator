@@ -1,0 +1,55 @@
+{
+  "app": {
+    "title": "Tạo Mã QR Wi-Fi",
+    "description": "Tạo mã QR cho mạng Wi-Fi • Nhấn Ctrl+Shift+T để chuyển đổi giao diện • Nhấn Ctrl+Shift+L để đổi ngôn ngữ"
+  },
+  "form": {
+    "ssid": {
+      "label": "Tên",
+      "fullLabel": "Tên Wi-Fi (SSID)",
+      "placeholder": "Nhập tên Wi-Fi"
+    },
+    "encryption": {
+      "label": "Loại Mã Hóa",
+      "placeholder": "Chọn loại mã hóa",
+      "options": {
+        "wpa": "WPA/WPA2",
+        "wep": "WEP",
+        "none": "Không"
+      }
+    },
+    "password": {
+      "label": "Mật Khẩu",
+      "placeholder": "Nhập mật khẩu"
+    }
+  },
+  "buttons": {
+    "saveImage": "Lưu Hình Ảnh",
+    "print": "In",
+    "copyPassword": "Sao chép mật khẩu"
+  },
+  "qr": {
+    "title": "Kết Nối Wi-Fi"
+  },
+  "theme": {
+    "switchToLight": "Chuyển sang giao diện sáng",
+    "switchToDark": "Chuyển sang giao diện tối",
+    "light": "Sáng",
+    "dark": "Tối",
+    "system": "Hệ Thống"
+  },
+  "language": {
+    "label": "Ngôn Ngữ",
+    "english": "Tiếng Anh",
+    "vietnamese": "Tiếng Việt"
+  },
+  "accessibility": {
+    "showPassword": "Hiển thị mật khẩu",
+    "hidePassword": "Ẩn mật khẩu"
+  },
+  "messages": {
+    "passwordCopied": "Đã sao chép mật khẩu",
+    "errorSavingImage": "Lỗi khi lưu hình ảnh",
+    "errorGeneratingQR": "Lỗi khi tạo mã QR"
+  }
+}
