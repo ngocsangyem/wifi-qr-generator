@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue
 import { useTheme } from './composables/useTheme'
 import { useI18nUtils } from './composables/useI18nUtils'
 import type { WifiCredentials, QRCodeData } from './types'
+import { Analytics } from '@vercel/analytics/vue' 
 
 // Dynamic imports for code splitting
 const WifiForm = defineAsyncComponent(() => import('./components/WifiForm.vue'))
@@ -157,5 +158,7 @@ onUnmounted(() => {
         </Suspense>
       </div>
     </div>
+
+    <Analytics />
   </div>
 </template>
