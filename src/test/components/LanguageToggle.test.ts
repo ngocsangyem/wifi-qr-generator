@@ -1,12 +1,20 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import LanguageToggle from '@/components/LanguageToggle.vue';
 import { createWrapper } from '../utils';
+import type { ComponentPublicInstance } from 'vue';
 
 // Type definition for locale object
 interface LocaleOption {
   code: string;
   name: string;
   flag: string;
+}
+
+// Type definition for LanguageToggle component instance
+interface LanguageToggleInstance extends ComponentPublicInstance {
+  availableLocales: LocaleOption[];
+  handleLanguageChange: (locale: string) => Promise<void>;
+  getLanguageCode: (locale: string) => string;
 }
 
 describe('LanguageToggle', () => {
@@ -48,15 +56,17 @@ describe('LanguageToggle', () => {
 
     // The flags are in the component's data but not visible in closed state
     // Check that the component has the proper structure for flags
-    expect(wrapper.vm.availableLocales).toBeDefined();
-    expect(wrapper.vm.availableLocales.length).toBe(2);
+    const vm = wrapper.vm as unknown as LanguageToggleInstance;
+    expect(vm.availableLocales).toBeDefined();
+    expect(vm.availableLocales.length).toBe(2);
   });
 
   it('emits language-changed when selection changes', async () => {
     const wrapper = createWrapper(LanguageToggle);
 
     // Simulate language change by calling the method directly
-    await wrapper.vm.handleLanguageChange('vi');
+    const vm = wrapper.vm as unknown as LanguageToggleInstance;
+    await vm.handleLanguageChange('vi');
 
     // Check that the event was emitted
     expect(wrapper.emitted('language-changed')).toBeTruthy();
@@ -67,11 +77,12 @@ describe('LanguageToggle', () => {
     const wrapper = createWrapper(LanguageToggle);
 
     // Test the getLanguageCode function directly
-    expect(wrapper.vm.getLanguageCode('vi')).toBe('VI');
-    expect(wrapper.vm.getLanguageCode('en')).toBe('EN');
+    const vm = wrapper.vm as unknown as LanguageToggleInstance;
+    expect(vm.getLanguageCode('vi')).toBe('VI');
+    expect(vm.getLanguageCode('en')).toBe('EN');
 
     // Test that the component has the correct structure for Vietnamese
-    const viLocale = (wrapper.vm.availableLocales as LocaleOption[]).find((l: LocaleOption) => l.code === 'vi');
+    const viLocale = vm.availableLocales.find((l: LocaleOption) => l.code === 'vi');
     expect(viLocale).toBeDefined();
     expect(viLocale?.flag).toBe('🇻🇳');
   });
@@ -126,8 +137,9 @@ describe('LanguageToggle', () => {
     const wrapper = createWrapper(LanguageToggle);
 
     // Test the getLanguageCode function
-    expect(wrapper.vm.getLanguageCode('en')).toBe('EN');
-    expect(wrapper.vm.getLanguageCode('vi')).toBe('VI');
+    const vm = wrapper.vm as unknown as LanguageToggleInstance;
+    expect(vm.getLanguageCode('en')).toBe('EN');
+    expect(vm.getLanguageCode('vi')).toBe('VI');
   });
 
   it('integrates with shadcn/vue Select components', () => {

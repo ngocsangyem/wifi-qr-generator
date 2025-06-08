@@ -1,7 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import WifiForm from '@/components/WifiForm.vue';
 import { createWrapper, fillInput, mockWifiCredentials, encryptionTestCases } from '../utils';
+import type { ComponentPublicInstance } from 'vue';
 import type { WifiCredentials } from '@/types';
+
+// Type definition for WifiForm component instance
+interface WifiFormInstance extends ComponentPublicInstance {
+  updateEncryptionType: (type: string) => Promise<void>;
+  togglePasswordVisibility: () => Promise<void>;
+  saveAsImage: () => Promise<void>;
+  printQR: () => Promise<void>;
+  showPassword: boolean;
+}
 
 describe('WifiForm', () => {
   const defaultProps = {
@@ -53,7 +63,8 @@ describe('WifiForm', () => {
     const wrapper = createWrapper(WifiForm, { props: defaultProps });
 
     // Call the method directly since shadcn/vue Select is complex to test
-    await wrapper.vm.updateEncryptionType('WEP');
+    const vm = wrapper.vm as unknown as WifiFormInstance;
+    await vm.updateEncryptionType('WEP');
 
     expect(wrapper.emitted('update:credentials')).toBeTruthy();
     const emittedCredentials = wrapper.emitted('update:credentials')?.[0]?.[0] as WifiCredentials;
@@ -74,7 +85,8 @@ describe('WifiForm', () => {
     const wrapper = createWrapper(WifiForm, { props: defaultProps });
 
     // Call the method directly
-    await wrapper.vm.updateEncryptionType('None');
+    const vm = wrapper.vm as unknown as WifiFormInstance;
+    await vm.updateEncryptionType('None');
 
     const emittedCredentials = wrapper.emitted('update:credentials')?.[0]?.[0] as WifiCredentials;
     expect(emittedCredentials.password).toBe('');
@@ -100,10 +112,11 @@ describe('WifiForm', () => {
     expect(passwordInput.attributes('type')).toBe('password');
 
     // Call the toggle method directly
-    await wrapper.vm.togglePasswordVisibility();
+    const vm = wrapper.vm as unknown as WifiFormInstance;
+    await vm.togglePasswordVisibility();
 
     // Check that showPassword ref was toggled
-    expect(wrapper.vm.showPassword).toBe(true);
+    expect(vm.showPassword).toBe(true);
 
     // Check that input type changed
     await wrapper.vm.$nextTick();
@@ -114,7 +127,8 @@ describe('WifiForm', () => {
     const wrapper = createWrapper(WifiForm, { props: defaultProps });
 
     // Call the method directly
-    await wrapper.vm.saveAsImage();
+    const vm = wrapper.vm as unknown as WifiFormInstance;
+    await vm.saveAsImage();
 
     expect(wrapper.emitted('save-as-image')).toBeTruthy();
   });
@@ -123,7 +137,8 @@ describe('WifiForm', () => {
     const wrapper = createWrapper(WifiForm, { props: defaultProps });
 
     // Call the method directly
-    await wrapper.vm.printQR();
+    const vm = wrapper.vm as unknown as WifiFormInstance;
+    await vm.printQR();
 
     expect(wrapper.emitted('print')).toBeTruthy();
   });

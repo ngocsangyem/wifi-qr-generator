@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { createWrapper } from '../utils';
+import type { ComponentPublicInstance } from 'vue';
+
+// Type definition for ThemeToggle component instance
+interface ThemeToggleInstance extends ComponentPublicInstance {
+  toggleTheme: () => Promise<void>;
+  isDark: boolean;
+}
 
 describe('ThemeToggle', () => {
   beforeEach(() => {
@@ -28,7 +35,8 @@ describe('ThemeToggle', () => {
     const wrapper = createWrapper(ThemeToggle);
 
     // Toggle to dark mode first
-    await wrapper.vm.toggleTheme();
+    const vm = wrapper.vm as unknown as ThemeToggleInstance;
+    await vm.toggleTheme();
     await wrapper.vm.$nextTick();
 
     // In dark mode (isDark = true), we should see the sun icon (to switch to light)
@@ -53,14 +61,15 @@ describe('ThemeToggle', () => {
 
   it('calls toggleTheme when clicked', async () => {
     const wrapper = createWrapper(ThemeToggle);
-    const initialIsDark = wrapper.vm.isDark;
+    const vm = wrapper.vm as unknown as ThemeToggleInstance;
+    const initialIsDark = vm.isDark;
 
     const button = wrapper.find('button');
     await button.trigger('click');
     await wrapper.vm.$nextTick();
 
     // Theme should change after click
-    expect(wrapper.vm.isDark).not.toBe(initialIsDark);
+    expect(vm.isDark).not.toBe(initialIsDark);
   });
 
   it('has correct CSS classes for styling', () => {
