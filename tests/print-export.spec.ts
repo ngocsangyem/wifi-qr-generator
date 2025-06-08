@@ -66,19 +66,19 @@ test.describe('Print and Export Functionality', () => {
       await wifiPage.waitForQRCodeGeneration();
       
       // Mock the export function to capture the element
-      let capturedElement: any;
       await page.addInitScript(() => {
-        const originalCaptureElementAsImage = (window as any).captureElementAsImage;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any).captureElementAsImage = async (elementId: string) => {
-          capturedElement = document.getElementById(elementId);
+          // Mock implementation that just resolves
+          document.getElementById(elementId);
           return Promise.resolve();
         };
       });
-      
+
       await wifiPage.saveAsImage();
-      
+
       // Verify the printable area was captured
-      const printableArea = await page.locator('#printable-area');
+      const printableArea = page.locator('#printable-area');
       await expect(printableArea).toBeVisible();
     });
 
@@ -125,16 +125,18 @@ test.describe('Print and Export Functionality', () => {
       await wifiPage.waitForQRCodeGeneration();
       
       // Mock window.print to track if it was called
-      let printCalled = false;
       await page.addInitScript(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any).print = () => {
-          printCalled = true;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (window as any).printCalled = true;
         };
       });
-      
+
       await wifiPage.print();
-      
+
       // Verify print was triggered
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const wasPrintCalled = await page.evaluate(() => (window as any).printCalled);
       expect(wasPrintCalled).toBe(true);
     });

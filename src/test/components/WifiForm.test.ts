@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import WifiForm from '@/components/WifiForm.vue';
-import { createWrapper, fillInput, clickButton, mockWifiCredentials, encryptionTestCases } from '../utils';
+import { createWrapper, fillInput, mockWifiCredentials, encryptionTestCases } from '../utils';
 import type { WifiCredentials } from '@/types';
 
 describe('WifiForm', () => {

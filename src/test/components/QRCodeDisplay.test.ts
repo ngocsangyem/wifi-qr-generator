@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import QRCodeDisplay from '@/components/QRCodeDisplay.vue';
 import { createWrapper, mockCanvasContext, expectQRCodeGenerated } from '../utils';
 import type { QRCodeData } from '@/types';

@@ -38,7 +38,7 @@ type Emits = {
 
 const emit = defineEmits<Emits>();
 
-const { currentLocale, availableLocales, changeLocale, t } = useI18nUtils();
+const { currentLocale, availableLocales, changeLocale } = useI18nUtils();
 
 const getLanguageCode = (locale: Locale): string => {
   const codes = {

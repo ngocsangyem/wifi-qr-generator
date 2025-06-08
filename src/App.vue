@@ -15,7 +15,7 @@ const LanguageToggle = defineAsyncComponent(() => import('./components/LanguageT
 const loadExportUtils = () => import('./utils/export')
 
 // Initialize theme and i18n
-const { isDark, toggleTheme } = useTheme()
+const { toggleTheme } = useTheme()
 const { currentLocale, availableLocales, changeLocale } = useI18nUtils()
 
 // Reactive state

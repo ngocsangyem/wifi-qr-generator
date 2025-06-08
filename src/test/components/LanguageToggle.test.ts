@@ -2,6 +2,13 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import LanguageToggle from '@/components/LanguageToggle.vue';
 import { createWrapper } from '../utils';
 
+// Type definition for locale object
+interface LocaleOption {
+  code: string;
+  name: string;
+  flag: string;
+}
+
 describe('LanguageToggle', () => {
   beforeEach(() => {
     // Reset localStorage before each test
@@ -64,7 +71,7 @@ describe('LanguageToggle', () => {
     expect(wrapper.vm.getLanguageCode('en')).toBe('EN');
 
     // Test that the component has the correct structure for Vietnamese
-    const viLocale = wrapper.vm.availableLocales.find((l: any) => l.code === 'vi');
+    const viLocale = (wrapper.vm.availableLocales as LocaleOption[]).find((l: LocaleOption) => l.code === 'vi');
     expect(viLocale).toBeDefined();
     expect(viLocale?.flag).toBe('🇻🇳');
   });
@@ -104,8 +111,8 @@ describe('LanguageToggle', () => {
     const wrapper = createWrapper(LanguageToggle);
 
     // Language names are in the component's data
-    expect(wrapper.vm.availableLocales.find((l: any) => l.code === 'en')?.name).toBe('English');
-    expect(wrapper.vm.availableLocales.find((l: any) => l.code === 'vi')?.name).toBe('Tiếng Việt');
+    expect((wrapper.vm.availableLocales as LocaleOption[]).find((l: LocaleOption) => l.code === 'en')?.name).toBe('English');
+    expect((wrapper.vm.availableLocales as LocaleOption[]).find((l: LocaleOption) => l.code === 'vi')?.name).toBe('Tiếng Việt');
   });
 
   it('maintains consistent styling', () => {

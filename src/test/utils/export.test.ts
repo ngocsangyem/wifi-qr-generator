@@ -1,9 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { captureElementAsImage, generateQRCodeFilename } from '@/utils/export';
 
+// Type definitions for test mocks
+interface MockCanvas {
+  width: number;
+  height: number;
+  toDataURL: ReturnType<typeof vi.fn>;
+  getContext?: ReturnType<typeof vi.fn>;
+}
+
+interface MockLink {
+  download: string;
+  href: string;
+  click: ReturnType<typeof vi.fn>;
+}
+
 // Extend global interface for html2canvas
 declare global {
-  var html2canvas: any;
+  // eslint-disable-next-line no-var
+  var html2canvas: ReturnType<typeof vi.fn>;
 }
 
 describe('export utilities', () => {
@@ -11,11 +27,13 @@ describe('export utilities', () => {
     vi.clearAllMocks();
 
     // Mock DOM elements with proper type assertions
+     
     document.getElementById = vi.fn() as any;
+     
     document.createElement = vi.fn() as any;
 
     // Mock canvas and context
-    const mockCanvas = {
+    const mockCanvas: MockCanvas = {
       width: 200,
       height: 200,
       toDataURL: vi.fn(() => 'data:image/png;base64,mock-data'),
@@ -24,17 +42,19 @@ describe('export utilities', () => {
         fillRect: vi.fn(),
         drawImage: vi.fn(),
       })),
-    } as any;
+    };
 
-    const mockLink = {
+    const mockLink: MockLink = {
       download: '',
       href: '',
       click: vi.fn(),
-    } as any;
+    };
 
+     
     (document.createElement as any) = vi.fn((tagName: string) => {
       if (tagName === 'canvas') return mockCanvas;
       if (tagName === 'a') return mockLink;
+       
       return {} as any;
     });
 
@@ -86,6 +106,7 @@ describe('export utilities', () => {
 
   describe('captureElementAsImage', () => {
     it('throws error when element not found', async () => {
+       
       (document.getElementById as any) = vi.fn(() => null);
 
       await expect(captureElementAsImage('non-existent')).rejects.toThrow(
@@ -189,7 +210,7 @@ describe('export utilities', () => {
       // The function should handle the error and restore elements
       try {
         await captureElementAsImage('test-element');
-      } catch (error) {
+      } catch {
         // Error is expected but elements should still be restored
       }
 

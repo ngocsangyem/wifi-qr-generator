@@ -27,7 +27,7 @@ test.describe('Responsive Design', () => {
         await expect(wifiPage.printButton).toBeVisible();
       });
 
-      test('should maintain proper layout spacing', async ({ page }) => {
+      test('should maintain proper layout spacing', async () => {
         // Check that elements don't overlap
         const formElements = [
           wifiPage.ssidInput,
