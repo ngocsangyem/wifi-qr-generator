@@ -1,23 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { createWrapper } from '../utils';
 
-// Create mock functions that we can control
-const mockToggleTheme = vi.fn();
-const mockIsDark = { value: false };
-
-// Mock the useTheme composable
-vi.mock('@/composables/useTheme', () => ({
-  useTheme: () => ({
-    toggleTheme: mockToggleTheme,
-    isDark: mockIsDark,
-  }),
-}));
-
 describe('ThemeToggle', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    mockIsDark.value = false;
+    // Reset localStorage before each test
+    localStorage.clear();
   });
 
   it('renders theme toggle button', () => {
@@ -28,18 +16,22 @@ describe('ThemeToggle', () => {
   });
 
   it('shows moon icon when in light mode', () => {
-    mockIsDark.value = false;
+    // Set theme to light mode
+    localStorage.setItem('theme-preference', 'light');
     const wrapper = createWrapper(ThemeToggle);
 
-    // In light mode, we should see the moon icon (to switch to dark)
+    // In light mode (isDark = false), we should see the moon icon (to switch to dark)
     expect(wrapper.html()).toContain('lucide-moon');
   });
 
-  it('shows sun icon when in dark mode', () => {
-    mockIsDark.value = true;
+  it('shows sun icon when in dark mode', async () => {
     const wrapper = createWrapper(ThemeToggle);
 
-    // In dark mode, we should see the sun icon (to switch to light)
+    // Toggle to dark mode first
+    await wrapper.vm.toggleTheme();
+    await wrapper.vm.$nextTick();
+
+    // In dark mode (isDark = true), we should see the sun icon (to switch to light)
     expect(wrapper.html()).toContain('lucide-sun');
   });
 
@@ -61,11 +53,14 @@ describe('ThemeToggle', () => {
 
   it('calls toggleTheme when clicked', async () => {
     const wrapper = createWrapper(ThemeToggle);
+    const initialIsDark = wrapper.vm.isDark;
 
     const button = wrapper.find('button');
     await button.trigger('click');
+    await wrapper.vm.$nextTick();
 
-    expect(mockToggleTheme).toHaveBeenCalledOnce();
+    // Theme should change after click
+    expect(wrapper.vm.isDark).not.toBe(initialIsDark);
   });
 
   it('has correct CSS classes for styling', () => {
@@ -103,25 +98,14 @@ describe('ThemeToggle', () => {
     expect(button.html()).toContain('h-4 w-4');
   });
 
-  it('supports keyboard navigation', async () => {
-    const mockToggleTheme = vi.fn();
-    
-    vi.doMock('@/composables/useTheme', () => ({
-      useTheme: () => ({
-        toggleTheme: mockToggleTheme,
-        isDark: false,
-      }),
-    }));
-
+  it('supports keyboard navigation', () => {
     const wrapper = createWrapper(ThemeToggle);
-    
+
     const button = wrapper.find('button');
-    
-    // Simulate Enter key press
-    await button.trigger('keydown.enter');
-    
-    // Button should be focusable and respond to keyboard events
+
+    // Button should be focusable and accessible via keyboard
     expect(button.attributes('tabindex')).not.toBe('-1');
+    expect(button.element.tagName).toBe('BUTTON');
   });
 
   it('has transition animation for icon changes', () => {

@@ -17,28 +17,8 @@ vi.mock('qrcode', () => ({
   },
 }));
 
-// Mock the composables
-vi.mock('@/composables/useTheme', () => ({
-  useTheme: vi.fn(() => ({
-    theme: { value: 'light' },
-    currentTheme: { value: 'light' },
-    isDark: { value: false },
-    setTheme: vi.fn(),
-    toggleTheme: vi.fn(),
-  })),
-}));
-
-vi.mock('@/composables/useI18nUtils', () => ({
-  useI18nUtils: vi.fn(() => ({
-    currentLocale: { value: 'en' },
-    availableLocales: [
-      { code: 'en', name: 'English', flag: '🇺🇸' },
-      { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
-    ],
-    changeLocale: vi.fn(),
-    t: vi.fn((key: string) => key),
-  })),
-}));
+// Remove global composable mocking to allow real functionality testing
+// Individual tests can mock these if needed
 
 // Mock localStorage
 const localStorageMock = {

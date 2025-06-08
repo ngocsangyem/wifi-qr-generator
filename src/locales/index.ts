@@ -26,7 +26,7 @@ const getInitialLocale = (): Locale => {
   return getBrowserLocale();
 };
 
-export const i18n = createI18n<[MessageSchema], Locale>({
+export const i18n = createI18n({
   legacy: false,
   locale: getInitialLocale(),
   fallbackLocale: 'en',
@@ -40,7 +40,9 @@ export const i18n = createI18n<[MessageSchema], Locale>({
 
 // Helper function to change locale and persist
 export const setLocale = (locale: Locale): void => {
-  i18n.global.locale = locale;
+  // In Vue I18n v9+ with Composition API, locale is a WritableComputedRef
+  // We can directly assign to it since it has a setter
+  i18n.global.locale.value = locale;
   localStorage.setItem(STORAGE_KEY, locale);
   document.documentElement.lang = locale;
 };
